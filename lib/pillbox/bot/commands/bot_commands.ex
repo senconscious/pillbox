@@ -1,4 +1,8 @@
 defmodule Pillbox.BotCommands do
+  @moduledoc """
+    Commands for pillbox telegram bot
+  """
+
   alias Telegram.Api, as: TelegramApi
   alias Pillbox.BotKeyboards
 

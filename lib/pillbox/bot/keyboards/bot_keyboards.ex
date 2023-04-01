@@ -1,4 +1,8 @@
 defmodule Pillbox.BotKeyboards do
+  @moduledoc """
+    Keyboards for pillbox telegram bot
+  """
+
   def build_main_menu_keyboard do
     %{
       inline_keyboard: [

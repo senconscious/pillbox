@@ -1,13 +1,19 @@
 defmodule Pillbox.Bot do
+  @doc """
+    Pillbox's Telegram Bot
+  """
+
   use Telegram.Bot
 
   alias Pillbox.BotCommands
+  alias Pillbox.Accounts
 
   @impl Telegram.Bot
   def handle_update(%{"message" => message}, token) do
-    %{"chat" => %{"id" => chat_id}, "text" => text} = message
+    %{"chat" => %{"id" => chat_id}, "text" => text, "from" => %{"id" => telegram_id}} = message
 
     if text == "/start" do
+      Accounts.get_or_create_user(telegram_id)
       BotCommands.reply_with_bot_description(chat_id, token)
     end
   end

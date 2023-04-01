@@ -26,3 +26,5 @@ pillbox-*.tar
 /tmp/
 
 .elixir_ls
+
+.env

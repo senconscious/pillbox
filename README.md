@@ -1,21 +1,27 @@
 # Pillbox
 
-**TODO: Add description**
+## Description
 
-## Installation
+Allows you to track your pill intakes
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `pillbox` to your list of dependencies in `mix.exs`:
+## Up and running
 
-```elixir
-def deps do
-  [
-    {:pillbox, "~> 0.1.0"}
-  ]
-end
+- Install corresponding erlang/elixir versions fron `.tool-versions` file in a root as well as postgresql
+- Copy sample configuration file:
+
+```sh
+  cp .env.sample .env
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/pillbox>.
+- Set `BOT_TOKEN` in `.env` file
+- Retreive deps: 
 
+```sh
+mix deps.get
+```
+
+- Start your app: 
+
+```sh
+source .env && iex -S mix
+```

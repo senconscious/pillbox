@@ -13,7 +13,8 @@ defmodule Pillbox.Application do
     ]
 
     children = [
-      {Telegram.Poller, bots: [{Pillbox.Bot, bot_config}]}
+      {Telegram.Poller, bots: [{Pillbox.Bot, bot_config}]},
+      Pillbox.Repo
       # Starts a worker by calling: Pillbox.Worker.start_link(arg)
       # {Pillbox.Worker, arg}
     ]
