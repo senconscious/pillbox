@@ -7,7 +7,13 @@ defmodule Pillbox.Application do
 
   @impl true
   def start(_type, _args) do
+    bot_config = [
+      token: Application.fetch_env!(:pillbox, :bot_token),
+      max_bot_concurrency: Application.fetch_env!(:pillbox, :max_bot_concurrency)
+    ]
+
     children = [
+      {Telegram.Poller, bots: [{Pillbox.Bot, bot_config}]}
       # Starts a worker by calling: Pillbox.Worker.start_link(arg)
       # {Pillbox.Worker, arg}
     ]
