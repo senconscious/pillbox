@@ -4,9 +4,9 @@ defmodule Pillbox.Accounts.UserQueries do
   """
 
   alias Pillbox.Repo
-  alias Pillbox.Accounts.User
+  alias Pillbox.Accounts.UserSchema
 
   def get_user_by(clauses) do
-    Repo.get_by(User, clauses)
+    Repo.get_by(UserSchema, clauses)
   end
 end

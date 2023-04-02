@@ -4,11 +4,11 @@ defmodule Pillbox.Accounts.UserCommands do
   """
 
   alias Pillbox.Repo
-  alias Pillbox.Accounts.User
+  alias Pillbox.Accounts.UserSchema
 
-  def insert_user(attrs) do
-    %User{}
-    |> User.changeset(attrs)
-    |> Repo.insert()
+  def insert_user!(attrs) do
+    %UserSchema{}
+    |> UserSchema.changeset(attrs)
+    |> Repo.insert!()
   end
 end

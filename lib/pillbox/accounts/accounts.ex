@@ -7,8 +7,8 @@ defmodule Pillbox.Accounts do
   alias Pillbox.Accounts.UserCommands
 
   def get_or_create_user(telegram_id) do
-    with nil <- UserQueries.get_user_by([telegram_id: telegram_id]) do
-      UserCommands.insert_user(%{telegram_id: telegram_id})
+    with nil <- UserQueries.get_user_by(telegram_id: telegram_id) do
+      UserCommands.insert_user!(%{telegram_id: telegram_id})
     end
   end
 end

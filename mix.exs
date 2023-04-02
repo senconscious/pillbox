@@ -7,7 +7,8 @@ defmodule Pillbox.MixProject do
       version: "0.1.0",
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      aliases: aliases()
     ]
   end
 
@@ -27,6 +28,12 @@ defmodule Pillbox.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:telegram, github: "visciang/telegram", tag: "0.22.4"},
       {:hackney, "~> 1.18"}
+    ]
+  end
+
+  defp aliases do
+    [
+      "ecto.reset": ["ecto.drop", "ecto.create", "ecto.migrate"]
     ]
   end
 end
