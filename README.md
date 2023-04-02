@@ -2,7 +2,23 @@
 
 ## Description
 
-Allows you to track your pill intakes
+Allows you to track your pill intakes in telegram
+
+## MVP
+
+- [x] User can create pill course
+- [] User can update pill course
+- [] User can delete pill course
+- [] User can create timetable for course
+- [] User can update timetable for course
+- [] User can delete timetable for course
+- [] User can checkin pill intakes
+- [] User can view incomming pill intakes
+- [] User notified about incomming pill intakes
+
+## MVP database structure
+
+You can view database architecture [here](https://dbdiagram.io/d/641eca425758ac5f17240c0d)
 
 ## Up and running
 
