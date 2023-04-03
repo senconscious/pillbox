@@ -46,7 +46,10 @@ defmodule Pillbox.BotKeyboards do
       inline_keyboard: [
         build_new_timetable_button(course_id)
         | Enum.map(timetables, fn %{id: id, pill_time: time} ->
-            [%{text: "#{time}", callback_data: "show_timetable_#{id}"}]
+            [
+              %{text: "#{time}", callback_data: "show_timetable_#{id}"},
+              %{text: "X", callback_data: "delete_timetable_#{id}"}
+            ]
           end)
       ]
     }

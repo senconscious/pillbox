@@ -28,4 +28,12 @@ defmodule Pillbox.Courses do
   def create_timetable(attrs) do
     TimetableCommands.insert_timetable(attrs)
   end
+
+  def get_timetable(id) do
+    TimetableQueries.get_timetable(id)
+  end
+
+  def delete_timetable(timetable) do
+    TimetableCommands.delete_timetable(timetable)
+  end
 end

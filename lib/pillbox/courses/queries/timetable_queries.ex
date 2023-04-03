@@ -10,4 +10,8 @@ defmodule Pillbox.Courses.TimetableQueries do
     |> order_by(asc: :pill_time)
     |> Repo.all()
   end
+
+  def get_timetable(id) do
+    Repo.get(TimetableSchema, id)
+  end
 end

@@ -62,13 +62,20 @@ defmodule PillboxWeb.Bot do
         TimetableBotController.list_timetables(
           params,
           Map.put(assigns, :course_id, course_id),
-          chat_state
+          Map.put(chat_state, :course_id, course_id)
         )
 
       "start_create_timetable_" <> course_id ->
         TimetableBotController.start_create_timetable(
           params,
           Map.put(assigns, :course_id, course_id),
+          chat_state
+        )
+
+      "delete_timetable_" <> timetable_id ->
+        TimetableBotController.delete_timetable(
+          params,
+          Map.put(assigns, :timetable_id, timetable_id),
           chat_state
         )
 

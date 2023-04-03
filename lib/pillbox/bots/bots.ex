@@ -123,24 +123,13 @@ defmodule Pillbox.Bots do
     )
   end
 
-  def reply_timetable_menu(chat_id, message_id, course_id, timetables, token) do
+  def reply_timetable_menu(chat_id, message_id, token, course_id, timetables, text \\ "Timetable") do
     keyboard_markup = BotKeyboards.build_timetable_keyboard(course_id, timetables)
 
     TelegramApi.request(token, "editMessageText",
       chat_id: chat_id,
       message_id: message_id,
-      text: "Timetable",
-      reply_markup: {:json, keyboard_markup}
-    )
-  end
-
-  def reply_with_failed_create_timetable(chat_id, message_id, course_id, timetables, token) do
-    keyboard_markup = BotKeyboards.build_timetable_keyboard(course_id, timetables)
-
-    TelegramApi.request(token, "editMessageText",
-      chat_id: chat_id,
-      message_id: message_id,
-      text: "Failed to create timetable",
+      text: text,
       reply_markup: {:json, keyboard_markup}
     )
   end

@@ -7,4 +7,6 @@ defmodule Pillbox.Courses.TimetableCommands do
     |> TimetableSchema.changeset(attrs)
     |> Repo.insert()
   end
+
+  def delete_timetable(timetable), do: Repo.delete(timetable)
 end
