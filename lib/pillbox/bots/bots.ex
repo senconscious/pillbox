@@ -123,6 +123,28 @@ defmodule Pillbox.Bots do
     )
   end
 
+  def reply_timetable_menu(chat_id, message_id, course_id, timetables, token) do
+    keyboard_markup = BotKeyboards.build_timetable_keyboard(course_id, timetables)
+
+    TelegramApi.request(token, "editMessageText",
+      chat_id: chat_id,
+      message_id: message_id,
+      text: "Timetable",
+      reply_markup: {:json, keyboard_markup}
+    )
+  end
+
+  def reply_with_failed_create_timetable(chat_id, message_id, course_id, timetables, token) do
+    keyboard_markup = BotKeyboards.build_timetable_keyboard(course_id, timetables)
+
+    TelegramApi.request(token, "editMessageText",
+      chat_id: chat_id,
+      message_id: message_id,
+      text: "Failed to create timetable",
+      reply_markup: {:json, keyboard_markup}
+    )
+  end
+
   def get_next_step(current_step) do
     case current_step do
       "pill_name" -> "start_date"
@@ -151,6 +173,14 @@ defmodule Pillbox.Bots do
     TelegramApi.request(token, "deleteMessage", chat_id: chat_id, message_id: message_id)
   end
 
+  def reply_for_create_timetable(chat_id, message_id, token) do
+    TelegramApi.request(token, "editMessageText",
+      chat_id: chat_id,
+      message_id: message_id,
+      text: "Please enter time in format HH-MM-SS"
+    )
+  end
+
   def reply_with_next_step_message(chat_id, message_id, step, course_attrs, token)
       when step == "confirmation" do
     text = BotTexts.build_text_for_step(step, course_attrs)
@@ -171,6 +201,14 @@ defmodule Pillbox.Bots do
       chat_id: chat_id,
       message_id: message_id,
       text: text
+    )
+  end
+
+  def reply_invalid_time_input(chat_id, message_id, token) do
+    TelegramApi.request(token, "editMessageText",
+      chat_id: chat_id,
+      message_id: message_id,
+      text: "Bad format. Please enter time in HH:MM:SS format"
     )
   end
 

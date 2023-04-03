@@ -4,7 +4,10 @@ defmodule Pillbox.Courses do
   """
 
   alias Pillbox.Courses.CourseQueries
+  alias Pillbox.Courses.TimetableQueries
+
   alias Pillbox.Courses.CourseCommands
+  alias Pillbox.Courses.TimetableCommands
 
   def create_course(attrs) do
     CourseCommands.insert_course(attrs)
@@ -16,5 +19,13 @@ defmodule Pillbox.Courses do
 
   def get_course(course_id) do
     CourseQueries.get_course(course_id)
+  end
+
+  def list_course_timetables(course_id) do
+    TimetableQueries.list_course_timetables(course_id)
+  end
+
+  def create_timetable(attrs) do
+    TimetableCommands.insert_timetable(attrs)
   end
 end

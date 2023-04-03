@@ -8,6 +8,7 @@ defmodule Pillbox.Courses.CourseSchema do
   import Ecto.Changeset
 
   alias Pillbox.Accounts.UserSchema
+  alias Pillbox.Courses.TimetableSchema
 
   @required [:pill_name, :start_date, :end_date, :user_id]
 
@@ -16,6 +17,8 @@ defmodule Pillbox.Courses.CourseSchema do
     field :active?, :boolean
     field :start_date, :date
     field :end_date, :date
+
+    has_many :timetables, TimetableSchema, foreign_key: :course_id
 
     belongs_to :user, UserSchema
 

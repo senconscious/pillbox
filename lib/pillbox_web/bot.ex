@@ -8,6 +8,7 @@ defmodule PillboxWeb.Bot do
   alias PillboxWeb.CommandBotController
   alias PillboxWeb.CourseBotController
   alias PillboxWeb.FallbackBotController
+  alias PillboxWeb.TimetableBotController
 
   @impl Telegram.ChatBot
   def init(_chat) do
@@ -24,6 +25,9 @@ defmodule PillboxWeb.Bot do
 
       create_course_action?(chat_state) ->
         CourseBotController.create_course(params, assigns, chat_state)
+
+      create_timetable_action?(chat_state) ->
+        TimetableBotController.create_timetable(params, assigns, chat_state)
 
       true ->
         FallbackBotController.handle_unknown_action(params, assigns, chat_state)
@@ -54,6 +58,20 @@ defmodule PillboxWeb.Bot do
           chat_state
         )
 
+      "list_course_timetable_" <> course_id ->
+        TimetableBotController.list_timetables(
+          params,
+          Map.put(assigns, :course_id, course_id),
+          chat_state
+        )
+
+      "start_create_timetable_" <> course_id ->
+        TimetableBotController.start_create_timetable(
+          params,
+          Map.put(assigns, :course_id, course_id),
+          chat_state
+        )
+
       _unknown_action ->
         FallbackBotController.handle_unknown_query(params, assigns, chat_state)
     end
@@ -64,6 +82,10 @@ defmodule PillboxWeb.Bot do
   defp create_course_action?(%{action: "create_course"}), do: true
 
   defp create_course_action?(_chat_state), do: false
+
+  defp create_timetable_action?(%{action: "create_timetable"}), do: true
+
+  defp create_timetable_action?(_chat_state), do: false
 
   defp build_message_assigns(message, token) do
     %{
