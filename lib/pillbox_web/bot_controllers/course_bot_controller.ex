@@ -64,6 +64,28 @@ defmodule PillboxWeb.CourseBotController do
     {:ok, state}
   end
 
+  def show_course(_params, assigns, state) do
+    %{
+      chat_id: chat_id,
+      message_id: message_id,
+      token: token,
+      callback_query_id: callback_query_id,
+      course_id: course_id
+    } = assigns
+
+    Bots.answer_callback_query(callback_query_id, token)
+
+    case Courses.get_course(course_id) do
+      nil ->
+        Bots.reply_no_course(chat_id, message_id, token)
+
+      course ->
+        Bots.reply_with_course(chat_id, message_id, course, token)
+    end
+
+    {:ok, state}
+  end
+
   def confirm_create_course(_params, assigns, state) do
     %{
       chat_id: chat_id,

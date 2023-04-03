@@ -14,4 +14,8 @@ defmodule Pillbox.Courses.CourseQueries do
     |> where([user: user], user.telegram_id == ^telegram_id)
     |> Repo.all()
   end
+
+  def get_course(id) do
+    Repo.get(CourseSchema, id)
+  end
 end

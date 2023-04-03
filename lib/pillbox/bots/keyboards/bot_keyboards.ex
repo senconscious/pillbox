@@ -21,6 +21,15 @@ defmodule Pillbox.BotKeyboards do
     }
   end
 
+  def build_show_course_keyboard(%{id: course_id} = _course) do
+    %{
+      inline_keyboard: [
+        [%{text: "Manage timetable", callback_data: "list_timetable_for_course_#{course_id}"}],
+        [%{text: "Update course", callback_data: "update_course_#{course_id}"}]
+      ]
+    }
+  end
+
   def build_confirmation_create_course_keyboard do
     %{
       inline_keyboard: [

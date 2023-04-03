@@ -13,4 +13,8 @@ defmodule Pillbox.Courses do
   def list_courses_for_telegram_user(telegram_id) do
     CourseQueries.list_courses_for_telegram_user(telegram_id)
   end
+
+  def get_course(course_id) do
+    CourseQueries.get_course(course_id)
+  end
 end

@@ -47,6 +47,13 @@ defmodule PillboxWeb.Bot do
       "discard_create_course" ->
         CourseBotController.discard_create_course(params, assigns, chat_state)
 
+      "show_course_" <> course_id ->
+        CourseBotController.show_course(
+          params,
+          Map.put(assigns, :course_id, course_id),
+          chat_state
+        )
+
       _unknown_action ->
         FallbackBotController.handle_unknown_query(params, assigns, chat_state)
     end

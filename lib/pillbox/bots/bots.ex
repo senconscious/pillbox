@@ -47,6 +47,17 @@ defmodule Pillbox.Bots do
     )
   end
 
+  def reply_no_course(chat_id, message_id, token) do
+    keyboard_markup = BotKeyboards.build_main_menu_keyboard()
+
+    TelegramApi.request(token, "editMessageText",
+      chat_id: chat_id,
+      message_id: message_id,
+      text: "Course not found",
+      reply_markup: {:json, keyboard_markup}
+    )
+  end
+
   def reply_with_courses(chat_id, message_id, courses, token) do
     keyboard_markup = BotKeyboards.build_list_courses_keyboard(courses)
 
@@ -54,6 +65,18 @@ defmodule Pillbox.Bots do
       chat_id: chat_id,
       message_id: message_id,
       text: "Your courses",
+      reply_markup: {:json, keyboard_markup}
+    )
+  end
+
+  def reply_with_course(chat_id, message_id, course, token) do
+    keyboard_markup = BotKeyboards.build_show_course_keyboard(course)
+    text = BotTexts.build_text_for_show_course(course)
+
+    TelegramApi.request(token, "editMessageText",
+      chat_id: chat_id,
+      message_id: message_id,
+      text: text,
       reply_markup: {:json, keyboard_markup}
     )
   end

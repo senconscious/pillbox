@@ -36,4 +36,10 @@ defmodule Pillbox.BotTexts do
     |> Enum.join(", ")
     |> then(fn message -> "Failed to create course: #{message}" end)
   end
+
+  def build_text_for_show_course(course) do
+    [:pill_name, :active?, :start_date, :end_date]
+    |> Enum.map(fn key -> "#{key}: #{Map.fetch!(course, key)}" end)
+    |> Enum.join("\n")
+  end
 end
