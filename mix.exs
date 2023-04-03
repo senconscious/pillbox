@@ -27,7 +27,8 @@ defmodule Pillbox.MixProject do
       {:ecto_sql, "~> 3.0"},
       {:postgrex, ">= 0.0.0"},
       {:telegram, github: "visciang/telegram", tag: "0.22.4"},
-      {:hackney, "~> 1.18"}
+      {:hackney, "~> 1.18"},
+      {:quantum, "~> 3.0"}
     ]
   end
 

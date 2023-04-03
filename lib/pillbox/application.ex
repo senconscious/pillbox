@@ -14,7 +14,8 @@ defmodule Pillbox.Application do
 
     children = [
       {Telegram.Poller, bots: [{PillboxWeb.Bot, bot_config}]},
-      Pillbox.Repo
+      Pillbox.Repo,
+      Pillbox.Scheduler
       # Starts a worker by calling: Pillbox.Worker.start_link(arg)
       # {Pillbox.Worker, arg}
     ]

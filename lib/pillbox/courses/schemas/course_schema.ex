@@ -37,10 +37,10 @@ defmodule Pillbox.Courses.CourseSchema do
 
     case Date.compare(end_date, today) do
       :lt ->
-        put_change(changeset, :active?, false)
+        put_change(changeset, :active?, true)
 
       _gt_or_eq ->
-        put_change(changeset, :active?, true)
+        put_change(changeset, :active?, false)
     end
   end
 
