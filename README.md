@@ -8,7 +8,7 @@ Allows you to track your pill intakes in telegram
 
 - [x] User can create pill course
 - [ ] User can update pill course
-- [ ] User can delete pill course
+- [x] User can delete pill course
 - [x] User can create timetable for course
 - [ ] User can update timetable for course
 - [x] User can delete timetable for course

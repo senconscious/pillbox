@@ -53,13 +53,9 @@ defmodule PillboxWeb.CourseBotController do
 
     Bots.answer_callback_query(callback_query_id, token)
 
-    case Courses.list_courses_for_telegram_user(telegram_id) do
-      [] ->
-        Bots.reply_no_courses(chat_id, message_id, token)
+    courses = Courses.list_courses_for_telegram_user(telegram_id)
 
-      courses ->
-        Bots.reply_with_courses(chat_id, message_id, courses, token)
-    end
+    Bots.reply_with_courses(chat_id, message_id, token, courses)
 
     {:ok, state}
   end
@@ -70,17 +66,20 @@ defmodule PillboxWeb.CourseBotController do
       message_id: message_id,
       token: token,
       callback_query_id: callback_query_id,
-      course_id: course_id
+      course_id: course_id,
+      telegram_id: telegram_id
     } = assigns
-
-    Bots.answer_callback_query(callback_query_id, token)
 
     case Courses.get_course(course_id) do
       nil ->
-        Bots.reply_no_course(chat_id, message_id, token)
+        Bots.answer_callback_query(callback_query_id, token, "Course not found")
+
+        courses = Courses.list_courses_for_telegram_user(telegram_id)
+        Bots.reply_with_courses(chat_id, message_id, token, courses)
 
       course ->
-        Bots.reply_with_course(chat_id, message_id, course, token)
+        Bots.answer_callback_query(callback_query_id, token)
+        Bots.reply_with_course(chat_id, message_id, token, course)
     end
 
     {:ok, state}
@@ -123,6 +122,33 @@ defmodule PillboxWeb.CourseBotController do
 
     Bots.answer_callback_query(callback_query_id, token)
     Bots.reply_discard_course_create(chat_id, message_id, token)
+
+    {:ok, Map.take(state, [:user_id, :bot_message_id])}
+  end
+
+  def delete_course(_params, assigns, state) do
+    %{
+      chat_id: chat_id,
+      message_id: message_id,
+      token: token,
+      callback_query_id: callback_query_id,
+      course_id: course_id,
+      telegram_id: telegram_id
+    } = assigns
+
+    with course when not is_nil(course) <- Courses.get_course(course_id),
+         {:ok, _deleted_course} <- Courses.delete_course(course) do
+      Bots.answer_callback_query(callback_query_id, token, "Course successfully deleted")
+    else
+      nil ->
+        Bots.answer_callback_query(callback_query_id, token, "Course not found")
+
+      {:error, _changeset} ->
+        Bots.answer_callback_query(callback_query_id, token, "Failed to delete course")
+    end
+
+    courses = Courses.list_courses_for_telegram_user(telegram_id)
+    Bots.reply_with_courses(chat_id, message_id, token, courses)
 
     {:ok, Map.take(state, [:user_id, :bot_message_id])}
   end

@@ -58,6 +58,13 @@ defmodule PillboxWeb.Bot do
           chat_state
         )
 
+      "delete_course_" <> course_id ->
+        CourseBotController.delete_course(
+          params,
+          Map.put(assigns, :course_id, course_id),
+          chat_state
+        )
+
       "list_course_timetable_" <> course_id ->
         TimetableBotController.list_timetables(
           params,

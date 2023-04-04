@@ -31,4 +31,8 @@ defmodule Pillbox.Courses.CourseCommands do
     |> where([course], not course.active? and course.start_date == ^today)
     |> Repo.update_all(set: [active?: true, updated_at: updated_at])
   end
+
+  def delete_course(course) do
+    Repo.delete(course)
+  end
 end

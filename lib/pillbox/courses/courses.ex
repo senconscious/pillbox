@@ -21,6 +21,10 @@ defmodule Pillbox.Courses do
     CourseQueries.get_course(course_id)
   end
 
+  def delete_course(course) do
+    CourseCommands.delete_course(course)
+  end
+
   def list_course_timetables(course_id) do
     TimetableQueries.list_course_timetables(course_id)
   end

@@ -37,13 +37,12 @@ defmodule Pillbox.Courses.CourseSchema do
   defp set_active_flag(%{valid?: true} = changeset) do
     today = Date.utc_today()
     end_date = get_field(changeset, :end_date)
+    start_date = get_field(changeset, :start_date)
 
-    case Date.compare(end_date, today) do
-      :lt ->
-        put_change(changeset, :active?, true)
-
-      _gt_or_eq ->
-        put_change(changeset, :active?, false)
+    if Date.compare(start_date, today) != :gt and Date.compare(end_date, today) != :lt do
+      put_change(changeset, :active?, true)
+    else
+      put_change(changeset, :active?, false)
     end
   end
 

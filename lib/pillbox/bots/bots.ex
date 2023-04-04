@@ -58,18 +58,18 @@ defmodule Pillbox.Bots do
     )
   end
 
-  def reply_with_courses(chat_id, message_id, courses, token) do
-    keyboard_markup = BotKeyboards.build_list_courses_keyboard(courses)
+  def reply_with_courses(chat_id, message_id, token, courses) do
+    keyboard_markup = BotKeyboards.build_courses_keyboard(courses)
 
     TelegramApi.request(token, "editMessageText",
       chat_id: chat_id,
       message_id: message_id,
-      text: "Your courses",
+      text: "Courses",
       reply_markup: {:json, keyboard_markup}
     )
   end
 
-  def reply_with_course(chat_id, message_id, course, token) do
+  def reply_with_course(chat_id, message_id, token, course) do
     keyboard_markup = BotKeyboards.build_show_course_keyboard(course)
     text = BotTexts.build_text_for_show_course(course)
 
@@ -203,6 +203,10 @@ defmodule Pillbox.Bots do
 
   def answer_callback_query(callback_query_id, token) do
     TelegramApi.request(token, "answerCallbackQuery", callback_query_id: callback_query_id)
+  end
+
+  def answer_callback_query(callback_query_id, token, text) do
+    TelegramApi.request(token, "answerCallbackQuery", callback_query_id: callback_query_id, text: text)
   end
 
   def answer_unknown_callback_query(callback_query_id, token) do
