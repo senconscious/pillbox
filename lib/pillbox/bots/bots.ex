@@ -7,12 +7,24 @@ defmodule Pillbox.Bots do
   alias Pillbox.BotKeyboards
   alias Pillbox.BotTexts
 
-  def reply_with_bot_description(chat_id, token) do
-    keyboard_markup = BotKeyboards.build_main_menu_keyboard()
+  def reply_with_bot_description(chat_id, token, telegram_id) do
+    keyboard_markup = BotKeyboards.build_main_menu_keyboard(telegram_id)
 
     TelegramApi.request(token, "sendMessage",
       chat_id: chat_id,
-      text: "Hello. I can help you to track your pill intakes",
+      text:
+        "Hello. I can help you to track your pill intakes. Note that currently only UTC timezone supported",
+      reply_markup: {:json, keyboard_markup}
+    )
+  end
+
+  def reply_with_pending_checkins(chat_id, message_id, token, checkins) do
+    keyboard_markup = BotKeyboards.build_pending_checkins_keyboard(checkins)
+
+    TelegramApi.request(token, "editMessageText",
+      chat_id: chat_id,
+      message_id: message_id,
+      text: "Pending checkins",
       reply_markup: {:json, keyboard_markup}
     )
   end
@@ -25,8 +37,8 @@ defmodule Pillbox.Bots do
     )
   end
 
-  def reply_unknown_action(chat_id, message_id, token) do
-    keyboard_markup = BotKeyboards.build_main_menu_keyboard()
+  def reply_unknown_action(chat_id, message_id, token, telegram_id) do
+    keyboard_markup = BotKeyboards.build_main_menu_keyboard(telegram_id)
 
     TelegramApi.request(token, "editMessageText",
       chat_id: chat_id,
@@ -36,19 +48,8 @@ defmodule Pillbox.Bots do
     )
   end
 
-  def reply_no_courses(chat_id, message_id, token) do
-    keyboard_markup = BotKeyboards.build_main_menu_keyboard()
-
-    TelegramApi.request(token, "editMessageText",
-      chat_id: chat_id,
-      message_id: message_id,
-      text: "No courses yet",
-      reply_markup: {:json, keyboard_markup}
-    )
-  end
-
-  def reply_no_course(chat_id, message_id, token) do
-    keyboard_markup = BotKeyboards.build_main_menu_keyboard()
+  def reply_no_course(chat_id, message_id, token, telegram_id) do
+    keyboard_markup = BotKeyboards.build_main_menu_keyboard(telegram_id)
 
     TelegramApi.request(token, "editMessageText",
       chat_id: chat_id,
@@ -89,8 +90,8 @@ defmodule Pillbox.Bots do
     )
   end
 
-  def reply_discard_course_create(chat_id, message_id, token) do
-    keyboard_markup = BotKeyboards.build_main_menu_keyboard()
+  def reply_discard_course_create(chat_id, message_id, token, telegram_id) do
+    keyboard_markup = BotKeyboards.build_main_menu_keyboard(telegram_id)
 
     TelegramApi.request(token, "editMessageText",
       chat_id: chat_id,
@@ -100,8 +101,8 @@ defmodule Pillbox.Bots do
     )
   end
 
-  def reply_with_success_create_course(chat_id, message_id, token) do
-    keyboard_markup = BotKeyboards.build_main_menu_keyboard()
+  def reply_with_success_create_course(chat_id, message_id, token, telegram_id) do
+    keyboard_markup = BotKeyboards.build_main_menu_keyboard(telegram_id)
 
     TelegramApi.request(token, "editMessageText",
       chat_id: chat_id,
@@ -111,8 +112,8 @@ defmodule Pillbox.Bots do
     )
   end
 
-  def reply_with_failed_create_course(chat_id, message_id, errors, token) do
-    keyboard_markup = BotKeyboards.build_main_menu_keyboard()
+  def reply_with_failed_create_course(chat_id, message_id, errors, token, telegram_id) do
+    keyboard_markup = BotKeyboards.build_main_menu_keyboard(telegram_id)
     text = BotTexts.build_text_for_failed_create_course(errors)
 
     TelegramApi.request(token, "editMessageText",
@@ -206,7 +207,10 @@ defmodule Pillbox.Bots do
   end
 
   def answer_callback_query(callback_query_id, token, text) do
-    TelegramApi.request(token, "answerCallbackQuery", callback_query_id: callback_query_id, text: text)
+    TelegramApi.request(token, "answerCallbackQuery",
+      callback_query_id: callback_query_id,
+      text: text
+    )
   end
 
   def answer_unknown_callback_query(callback_query_id, token) do

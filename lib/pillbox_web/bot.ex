@@ -5,6 +5,7 @@ defmodule PillboxWeb.Bot do
 
   use Telegram.ChatBot
 
+  alias PillboxWeb.CheckinBotController
   alias PillboxWeb.CommandBotController
   alias PillboxWeb.CourseBotController
   alias PillboxWeb.FallbackBotController
@@ -83,6 +84,16 @@ defmodule PillboxWeb.Bot do
         TimetableBotController.delete_timetable(
           params,
           Map.put(assigns, :timetable_id, timetable_id),
+          chat_state
+        )
+
+      "list_pending_checkins_" <> _telegram_id ->
+        CheckinBotController.list_checkins(params, assigns, chat_state)
+
+      "checkin_" <> checkin_id ->
+        CheckinBotController.checkin(
+          params,
+          Map.put(assigns, :checkin_id, checkin_id),
           chat_state
         )
 

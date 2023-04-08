@@ -10,4 +10,9 @@ config :pillbox, Pillbox.Scheduler,
     {"@daily", {Pillbox.Courses.CourseCommands, :update_started_courses, []}}
   ]
 
+config :pillbox, Oban,
+  repo: Pillbox.Repo,
+  plugins: [Oban.Plugins.Pruner],
+  queues: [course_timetables: 5]
+
 import_config "#{config_env()}.exs"

@@ -9,11 +9,11 @@ defmodule PillboxWeb.FallbackBotController do
   end
 
   def handle_unknown_action(_params, assigns, state) do
-    %{bot_message_id: bot_message_id} = state
+    %{bot_message_id: bot_message_id, telegram_id: telegram_id} = state
     %{chat_id: chat_id, message_id: message_id, token: token} = assigns
 
     Bots.delete_message(chat_id, message_id, token)
-    Bots.reply_unknown_action(chat_id, bot_message_id, token)
+    Bots.reply_unknown_action(chat_id, bot_message_id, token, telegram_id)
     {:ok, Map.take(state, [:user_id, :bot_message_id])}
   end
 end

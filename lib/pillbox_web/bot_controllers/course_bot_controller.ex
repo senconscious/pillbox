@@ -93,7 +93,7 @@ defmodule PillboxWeb.CourseBotController do
       callback_query_id: callback_query_id
     } = assigns
 
-    %{course: course, user_id: user_id} = state
+    %{course: course, user_id: user_id, telegram_id: telegram_id} = state
 
     Bots.answer_callback_query(callback_query_id, token)
 
@@ -102,11 +102,11 @@ defmodule PillboxWeb.CourseBotController do
     |> Courses.create_course()
     |> case do
       {:ok, _course} ->
-        Bots.reply_with_success_create_course(chat_id, message_id, token)
+        Bots.reply_with_success_create_course(chat_id, message_id, token, telegram_id)
 
       {:error, changeset} ->
         errors = Helpers.traverse_changeset_errors(changeset)
-        Bots.reply_with_failed_create_course(chat_id, message_id, errors, token)
+        Bots.reply_with_failed_create_course(chat_id, message_id, errors, token, telegram_id)
     end
 
     {:ok, Map.take(state, [:user_id, :bot_message_id])}
@@ -120,8 +120,10 @@ defmodule PillboxWeb.CourseBotController do
       callback_query_id: callback_query_id
     } = assigns
 
+    %{telegram_id: telegram_id} = state
+
     Bots.answer_callback_query(callback_query_id, token)
-    Bots.reply_discard_course_create(chat_id, message_id, token)
+    Bots.reply_discard_course_create(chat_id, message_id, token, telegram_id)
 
     {:ok, Map.take(state, [:user_id, :bot_message_id])}
   end

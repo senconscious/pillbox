@@ -3,10 +3,11 @@ defmodule Pillbox.BotKeyboards do
     Keyboards for pillbox telegram bot
   """
 
-  def build_main_menu_keyboard do
+  def build_main_menu_keyboard(telegram_id) do
     %{
       inline_keyboard: [
-        [%{text: "Courses", callback_data: "list_courses"}]
+        [%{text: "Courses", callback_data: "list_courses"}],
+        [%{text: "Pending checkings", callback_data: "list_pending_checkins_#{telegram_id}"}]
       ]
     }
   end
@@ -63,6 +64,16 @@ defmodule Pillbox.BotKeyboards do
               build_callback_button("delete_timetable_#{id}", "X")
             ]
           end)
+      ]
+    }
+  end
+
+  def build_pending_checkins_keyboard(checkins) do
+    %{
+      inline_keyboard: [
+        Enum.map(checkins, fn %{id: checkin_id, pill_name: pill_name} ->
+          build_callback_button("checkin_#{checkin_id}", "#{pill_name}")
+        end)
       ]
     }
   end

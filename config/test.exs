@@ -6,3 +6,5 @@ config :pillbox, Pillbox.Repo,
   password: "postgres",
   hostname: "localhost",
   port: "5432"
+
+config :pillbox, Oban, testing: :inline
