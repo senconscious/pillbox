@@ -1,4 +1,4 @@
-defmodule Pillbox.BotKeyboards do
+defmodule Pillbox.Bots.BotKeyboards do
   @moduledoc """
     Keyboards for pillbox telegram bot
   """

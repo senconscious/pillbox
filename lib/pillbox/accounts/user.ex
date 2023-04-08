@@ -1,4 +1,4 @@
-defmodule Pillbox.Accounts.UserSchema do
+defmodule Pillbox.Accounts.User do
   @doc """
     User's schema
   """
@@ -7,12 +7,12 @@ defmodule Pillbox.Accounts.UserSchema do
 
   import Ecto.Changeset
 
-  alias Pillbox.Courses.CourseSchema
+  alias Pillbox.Courses.Course
 
   schema "users" do
     field :telegram_id, :integer
 
-    has_many :courses, CourseSchema, foreign_key: :user_id
+    has_many :courses, Course
 
     timestamps()
   end

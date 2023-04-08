@@ -5,11 +5,10 @@ defmodule PillboxWeb.Bot do
 
   use Telegram.ChatBot
 
-  alias PillboxWeb.CheckinBotController
-  alias PillboxWeb.CommandBotController
-  alias PillboxWeb.CourseBotController
-  alias PillboxWeb.FallbackBotController
-  alias PillboxWeb.TimetableBotController
+  alias Pillbox.BotCheckins
+  alias Pillbox.BotCommands
+  alias Pillbox.BotCourses
+  alias Pillbox.BotTimetables
 
   @impl Telegram.ChatBot
   def init(_chat) do
@@ -17,88 +16,76 @@ defmodule PillboxWeb.Bot do
   end
 
   @impl Telegram.ChatBot
-  def handle_update(%{"message" => message} = params, token, chat_state) do
+  def handle_update(%{"message" => message}, token, chat_state) do
     %{message_text: message_text} = assigns = build_message_assigns(message, token)
 
     cond do
       start_command?(message_text) ->
-        CommandBotController.start(params, assigns, chat_state)
+        BotCommands.start(assigns, chat_state)
 
       create_course_action?(chat_state) ->
-        CourseBotController.create_course(params, assigns, chat_state)
+        BotCourses.create_course(assigns, chat_state)
 
       create_timetable_action?(chat_state) ->
-        TimetableBotController.create_timetable(params, assigns, chat_state)
+        BotTimetables.create_timetable(assigns, chat_state)
 
       true ->
-        FallbackBotController.handle_unknown_action(params, assigns, chat_state)
+        BotCommands.handle_unknown_action(assigns, chat_state)
     end
   end
 
   @impl Telegram.ChatBot
-  def handle_update(%{"callback_query" => callback_query} = params, token, chat_state) do
+  def handle_update(%{"callback_query" => callback_query}, token, chat_state) do
     %{action: action} = assigns = build_callback_query_assigns(callback_query, token)
 
     case action do
       "list_courses" ->
-        CourseBotController.list_courses(params, assigns, chat_state)
+        BotCourses.list_courses(assigns, chat_state)
 
       "start_create_course" ->
-        CourseBotController.start_create_course(params, assigns, chat_state)
+        BotCourses.start_create_course(assigns, chat_state)
 
       "confirm_create_course" ->
-        CourseBotController.confirm_create_course(params, assigns, chat_state)
+        BotCourses.confirm_create_course(assigns, chat_state)
 
       "discard_create_course" ->
-        CourseBotController.discard_create_course(params, assigns, chat_state)
+        BotCourses.discard_create_course(assigns, chat_state)
 
       "show_course_" <> course_id ->
-        CourseBotController.show_course(
-          params,
-          Map.put(assigns, :course_id, course_id),
-          chat_state
-        )
+        assigns
+        |> Map.put(:course_id, course_id)
+        |> BotCourses.show_course(chat_state)
 
       "delete_course_" <> course_id ->
-        CourseBotController.delete_course(
-          params,
-          Map.put(assigns, :course_id, course_id),
-          chat_state
-        )
+        assigns
+        |> Map.put(:course_id, course_id)
+        |> BotCourses.delete_course(chat_state)
 
       "list_course_timetable_" <> course_id ->
-        TimetableBotController.list_timetables(
-          params,
-          Map.put(assigns, :course_id, course_id),
-          Map.put(chat_state, :course_id, course_id)
-        )
+        assigns
+        |> Map.put(:course_id, course_id)
+        |> BotTimetables.list_timetables(chat_state)
 
       "start_create_timetable_" <> course_id ->
-        TimetableBotController.start_create_timetable(
-          params,
-          Map.put(assigns, :course_id, course_id),
-          chat_state
-        )
+        assigns
+        |> Map.put(:course_id, course_id)
+        |> BotTimetables.start_create_timetable(chat_state)
 
       "delete_timetable_" <> timetable_id ->
-        TimetableBotController.delete_timetable(
-          params,
-          Map.put(assigns, :timetable_id, timetable_id),
-          chat_state
-        )
+        assigns
+        |> Map.put(:timetable_id, timetable_id)
+        |> BotTimetables.delete_timetable(chat_state)
 
       "list_pending_checkins_" <> _telegram_id ->
-        CheckinBotController.list_checkins(params, assigns, chat_state)
+        BotCheckins.list_checkins(assigns, chat_state)
 
       "checkin_" <> checkin_id ->
-        CheckinBotController.checkin(
-          params,
-          Map.put(assigns, :checkin_id, checkin_id),
-          chat_state
-        )
+        assigns
+        |> Map.put(:checkin_id, checkin_id)
+        |> BotCheckins.checkin(chat_state)
 
       _unknown_action ->
-        FallbackBotController.handle_unknown_query(params, assigns, chat_state)
+        BotCommands.handle_unknown_query(assigns, chat_state)
     end
   end
 

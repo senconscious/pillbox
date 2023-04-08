@@ -1,4 +1,4 @@
-defmodule Pillbox.Courses.CourseSchema do
+defmodule Pillbox.Courses.Course do
   @moduledoc """
     Course Schema
   """
@@ -7,8 +7,8 @@ defmodule Pillbox.Courses.CourseSchema do
 
   import Ecto.Changeset
 
-  alias Pillbox.Accounts.UserSchema
-  alias Pillbox.Courses.TimetableSchema
+  alias Pillbox.Accounts.User
+  alias Pillbox.Courses.Timetable
 
   @required [:pill_name, :start_date, :end_date, :user_id]
 
@@ -18,9 +18,9 @@ defmodule Pillbox.Courses.CourseSchema do
     field :start_date, :date
     field :end_date, :date
 
-    has_many :timetables, TimetableSchema, foreign_key: :course_id
+    has_many :timetables, Timetable
 
-    belongs_to :user, UserSchema
+    belongs_to :user, User
 
     timestamps()
   end

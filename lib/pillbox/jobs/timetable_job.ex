@@ -1,7 +1,7 @@
-defmodule Pillbox.Courses.TimetableWorker do
+defmodule Pillbox.Jobs.TimetableJob do
   use Oban.Worker, queue: :course_timetables, max_attempts: 1
 
-  alias Pillbox.Courses
+  alias Pillbox.Checkins
 
   @one_day_in_seconds 24 * 60 * 60
 
@@ -11,6 +11,6 @@ defmodule Pillbox.Courses.TimetableWorker do
     |> new(schedule_in: @one_day_in_seconds)
     |> Oban.insert!()
 
-    Courses.create_checkin(timetable_id)
+    Checkins.create_checkin(timetable_id)
   end
 end

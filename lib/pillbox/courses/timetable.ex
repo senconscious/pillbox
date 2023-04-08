@@ -1,18 +1,18 @@
-defmodule Pillbox.Courses.TimetableSchema do
+defmodule Pillbox.Courses.Timetable do
   use Ecto.Schema
 
   import Ecto.Changeset
 
-  alias Pillbox.Courses.CourseSchema
-  alias Pillbox.Courses.CheckinSchema
+  alias Pillbox.Courses.Course
+  alias Pillbox.Courses.Checkin
 
   schema "timetables" do
     field :pill_time, :time
     field :pill_intake_description, :string
 
-    belongs_to :course, CourseSchema
+    belongs_to :course, Course
 
-    has_many :checkins, CheckinSchema, foreign_key: :timetable_id
+    has_many :checkins, Checkin
 
     timestamps()
   end

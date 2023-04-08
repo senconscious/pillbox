@@ -1,8 +1,8 @@
-defmodule PillboxWeb.TimetableBotController do
-  alias Pillbox.Bots
-  alias Pillbox.Courses
+defmodule Pillbox.BotTimetables do
+  alias Pillbox.BotReplies
+  alias Pillbox.Timetables
 
-  def list_timetables(_params, assigns, state) do
+  def list_timetables(assigns, state) do
     %{
       chat_id: chat_id,
       message_id: message_id,
@@ -11,16 +11,16 @@ defmodule PillboxWeb.TimetableBotController do
       course_id: course_id
     } = assigns
 
-    Bots.answer_callback_query(callback_query_id, token)
+    BotReplies.answer_callback_query(callback_query_id, token)
 
-    timetables = Courses.list_course_timetables(course_id)
+    timetables = Timetables.list_course_timetables(course_id)
 
-    Bots.reply_timetable_menu(chat_id, message_id, token, course_id, timetables)
+    BotReplies.reply_timetable_menu(chat_id, message_id, token, course_id, timetables)
 
-    {:ok, state}
+    {:ok, Map.put(state, :course_id, course_id)}
   end
 
-  def start_create_timetable(_params, assigns, state) do
+  def start_create_timetable(assigns, state) do
     %{
       chat_id: chat_id,
       message_id: message_id,
@@ -29,9 +29,9 @@ defmodule PillboxWeb.TimetableBotController do
       course_id: course_id
     } = assigns
 
-    Bots.answer_callback_query(callback_query_id, token)
+    BotReplies.answer_callback_query(callback_query_id, token)
 
-    Bots.reply_for_create_timetable(chat_id, message_id, token)
+    BotReplies.reply_for_create_timetable(chat_id, message_id, token)
 
     {:ok,
      Map.merge(state, %{
@@ -41,7 +41,7 @@ defmodule PillboxWeb.TimetableBotController do
      })}
   end
 
-  def create_timetable(_params, assigns, state) do
+  def create_timetable(assigns, state) do
     %{
       chat_id: chat_id,
       message_id: message_id,
@@ -51,19 +51,19 @@ defmodule PillboxWeb.TimetableBotController do
 
     %{timetable: attrs, bot_message_id: bot_message_id, course_id: course_id} = state
 
-    Bots.delete_message(chat_id, message_id, token)
+    BotReplies.delete_message(chat_id, message_id, token)
 
     with {:ok, time} <- Time.from_iso8601(message_text),
-         {:ok, _timetable} <- Courses.create_timetable(Map.put(attrs, :pill_time, time)) do
-      timetables = Courses.list_course_timetables(course_id)
-      Bots.reply_timetable_menu(chat_id, bot_message_id, token, course_id, timetables)
+         {:ok, _timetable} <- Timetables.create_timetable(Map.put(attrs, :pill_time, time)) do
+      timetables = Timetables.list_course_timetables(course_id)
+      BotReplies.reply_timetable_menu(chat_id, bot_message_id, token, course_id, timetables)
 
       {:ok, Map.take(state, [:user_id, :bot_message_id, :course_id])}
     else
       {:error, %Ecto.Changeset{}} ->
-        timetables = Courses.list_course_timetables(course_id)
+        timetables = Timetables.list_course_timetables(course_id)
 
-        Bots.reply_timetable_menu(
+        BotReplies.reply_timetable_menu(
           chat_id,
           bot_message_id,
           token,
@@ -75,13 +75,13 @@ defmodule PillboxWeb.TimetableBotController do
         {:ok, Map.take(state, [:user_id, :bot_message_id, :course_id])}
 
       {:error, _error} ->
-        Bots.reply_invalid_time_input(chat_id, bot_message_id, token)
+        BotReplies.reply_invalid_time_input(chat_id, bot_message_id, token)
 
         {:ok, state}
     end
   end
 
-  def delete_timetable(_params, assigns, state) do
+  def delete_timetable(assigns, state) do
     %{
       chat_id: chat_id,
       message_id: message_id,
@@ -92,19 +92,19 @@ defmodule PillboxWeb.TimetableBotController do
 
     %{course_id: course_id} = state
 
-    Bots.answer_callback_query(callback_query_id, token)
+    BotReplies.answer_callback_query(callback_query_id, token)
 
-    with timetable when not is_nil(timetable) <- Courses.get_timetable(timetable_id),
-         {:ok, %{course_id: course_id}} <- Courses.delete_timetable(timetable) do
-      timetables = Courses.list_course_timetables(course_id)
-      Bots.reply_timetable_menu(chat_id, message_id, token, course_id, timetables)
+    with timetable when not is_nil(timetable) <- Timetables.get_timetable(timetable_id),
+         {:ok, %{course_id: course_id}} <- Timetables.delete_timetable(timetable) do
+      timetables = Timetables.list_course_timetables(course_id)
+      BotReplies.reply_timetable_menu(chat_id, message_id, token, course_id, timetables)
 
       {:ok, state}
     else
       nil ->
-        timetables = Courses.list_course_timetables(course_id)
+        timetables = Timetables.list_course_timetables(course_id)
 
-        Bots.reply_timetable_menu(
+        BotReplies.reply_timetable_menu(
           chat_id,
           message_id,
           token,
@@ -116,9 +116,9 @@ defmodule PillboxWeb.TimetableBotController do
         {:ok, state}
 
       {:error, _changeset} ->
-        timetables = Courses.list_course_timetables(course_id)
+        timetables = Timetables.list_course_timetables(course_id)
 
-        Bots.reply_timetable_menu(
+        BotReplies.reply_timetable_menu(
           chat_id,
           message_id,
           token,

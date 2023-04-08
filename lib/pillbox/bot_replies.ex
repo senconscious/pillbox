@@ -1,11 +1,11 @@
-defmodule Pillbox.Bots do
+defmodule Pillbox.BotReplies do
   @moduledoc """
     Pillbox telegram bot API
   """
 
   alias Telegram.Api, as: TelegramApi
-  alias Pillbox.BotKeyboards
-  alias Pillbox.BotTexts
+  alias Pillbox.Bots.BotKeyboards
+  alias Pillbox.Bots.BotTexts
 
   def reply_with_bot_description(chat_id, token, telegram_id) do
     keyboard_markup = BotKeyboards.build_main_menu_keyboard(telegram_id)

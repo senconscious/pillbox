@@ -1,14 +1,14 @@
-defmodule Pillbox.Courses.CheckinSchema do
+defmodule Pillbox.Courses.Checkin do
   use Ecto.Schema
 
   import Ecto.Changeset
 
-  alias Pillbox.Courses.TimetableSchema
+  alias Pillbox.Courses.Timetable
 
   schema "checkins" do
     field :checked?, :boolean, default: false
 
-    belongs_to :timetable, TimetableSchema
+    belongs_to :timetable, Timetable
 
     timestamps()
   end

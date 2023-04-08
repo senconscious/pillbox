@@ -1,7 +1,13 @@
-defmodule Pillbox.Courses.TimetableCommands do
-  alias Pillbox.Courses.TimetableWorker
+defmodule Pillbox.Timetables do
+  @moduledoc """
+    Timetables API
+  """
 
-  alias Pillbox.Courses.TimetableSchema
+  import Ecto.Query, only: [where: 3, order_by: 2]
+
+  alias Pillbox.Jobs.TimetableJob
+
+  alias Pillbox.Courses.Timetable
   alias Pillbox.Repo
 
   @one_day_in_seconds 24 * 60 * 60
@@ -19,8 +25,8 @@ defmodule Pillbox.Courses.TimetableCommands do
   end
 
   defp insert_timetable(attrs) do
-    %TimetableSchema{}
-    |> TimetableSchema.changeset(attrs)
+    %Timetable{}
+    |> Timetable.changeset(attrs)
     |> Repo.insert()
   end
 
@@ -28,7 +34,7 @@ defmodule Pillbox.Courses.TimetableCommands do
     schedule_in = get_seconds_for_timetable_job(pill_time)
 
     %{timetable_id: timetable_id, schedule_in: schedule_in}
-    |> TimetableWorker.new()
+    |> TimetableJob.new()
     |> Oban.insert()
   end
 
@@ -48,4 +54,15 @@ defmodule Pillbox.Courses.TimetableCommands do
   end
 
   def delete_timetable(timetable), do: Repo.delete(timetable)
+
+  def list_course_timetables(course_id) do
+    Timetable
+    |> where([table], table.course_id == ^course_id)
+    |> order_by(asc: :pill_time)
+    |> Repo.all()
+  end
+
+  def get_timetable(id) do
+    Repo.get(Timetable, id)
+  end
 end
