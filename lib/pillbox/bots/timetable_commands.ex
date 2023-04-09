@@ -1,6 +1,9 @@
 defmodule Pillbox.Bots.TimetableCommands do
-  alias Pillbox.Bots.ReplyCommands
   alias Pillbox.Courses.Timetables
+
+  alias Pillbox.Bots.CommandAPI
+
+  alias Pillbox.Bots.Keyboards
 
   def list_timetables(assigns, state) do
     %{
@@ -11,11 +14,11 @@ defmodule Pillbox.Bots.TimetableCommands do
       course_id: course_id
     } = assigns
 
-    ReplyCommands.answer_callback_query(callback_query_id, token)
+    CommandAPI.answer_callback_query(callback_query_id, token)
 
     timetables = Timetables.list_course_timetables(course_id)
 
-    ReplyCommands.reply_timetable_menu(chat_id, message_id, token, course_id, timetables)
+    reply_timetable_menu(chat_id, message_id, token, course_id, timetables)
 
     {:ok, Map.put(state, :course_id, course_id)}
   end
@@ -29,9 +32,9 @@ defmodule Pillbox.Bots.TimetableCommands do
       course_id: course_id
     } = assigns
 
-    ReplyCommands.answer_callback_query(callback_query_id, token)
+    CommandAPI.answer_callback_query(callback_query_id, token)
 
-    ReplyCommands.reply_for_create_timetable(chat_id, message_id, token)
+    reply_for_create_timetable(chat_id, message_id, token)
 
     {:ok,
      Map.merge(state, %{
@@ -51,19 +54,19 @@ defmodule Pillbox.Bots.TimetableCommands do
 
     %{timetable: attrs, bot_message_id: bot_message_id, course_id: course_id} = state
 
-    ReplyCommands.delete_message(chat_id, message_id, token)
+    CommandAPI.delete_message(chat_id, message_id, token)
 
     with {:ok, time} <- Time.from_iso8601(message_text),
          {:ok, _timetable} <- Timetables.create_timetable(Map.put(attrs, :pill_time, time)) do
       timetables = Timetables.list_course_timetables(course_id)
-      ReplyCommands.reply_timetable_menu(chat_id, bot_message_id, token, course_id, timetables)
+      reply_timetable_menu(chat_id, bot_message_id, token, course_id, timetables)
 
       {:ok, Map.take(state, [:user_id, :bot_message_id, :course_id])}
     else
       {:error, %Ecto.Changeset{}} ->
         timetables = Timetables.list_course_timetables(course_id)
 
-        ReplyCommands.reply_timetable_menu(
+        reply_timetable_menu(
           chat_id,
           bot_message_id,
           token,
@@ -75,7 +78,7 @@ defmodule Pillbox.Bots.TimetableCommands do
         {:ok, Map.take(state, [:user_id, :bot_message_id, :course_id])}
 
       {:error, _error} ->
-        ReplyCommands.reply_invalid_time_input(chat_id, bot_message_id, token)
+        reply_invalid_time_input(chat_id, bot_message_id, token)
 
         {:ok, state}
     end
@@ -92,19 +95,19 @@ defmodule Pillbox.Bots.TimetableCommands do
 
     %{course_id: course_id} = state
 
-    ReplyCommands.answer_callback_query(callback_query_id, token)
+    CommandAPI.answer_callback_query(callback_query_id, token)
 
     with timetable when not is_nil(timetable) <- Timetables.get_timetable(timetable_id),
          {:ok, %{course_id: course_id}} <- Timetables.delete_timetable(timetable) do
       timetables = Timetables.list_course_timetables(course_id)
-      ReplyCommands.reply_timetable_menu(chat_id, message_id, token, course_id, timetables)
+      reply_timetable_menu(chat_id, message_id, token, course_id, timetables)
 
       {:ok, state}
     else
       nil ->
         timetables = Timetables.list_course_timetables(course_id)
 
-        ReplyCommands.reply_timetable_menu(
+        reply_timetable_menu(
           chat_id,
           message_id,
           token,
@@ -118,7 +121,7 @@ defmodule Pillbox.Bots.TimetableCommands do
       {:error, _changeset} ->
         timetables = Timetables.list_course_timetables(course_id)
 
-        ReplyCommands.reply_timetable_menu(
+        reply_timetable_menu(
           chat_id,
           message_id,
           token,
@@ -129,5 +132,35 @@ defmodule Pillbox.Bots.TimetableCommands do
 
         {:ok, state}
     end
+  end
+
+  defp reply_timetable_menu(
+         chat_id,
+         message_id,
+         token,
+         course_id,
+         timetables,
+         text \\ "Timetable"
+       ) do
+    keyboard =
+      Keyboards.build_inline_keyboard(:timetable_menu,
+        course_id: course_id,
+        timetables: timetables
+      )
+
+    CommandAPI.edit_message(chat_id, message_id, token, text, keyboard)
+  end
+
+  defp reply_for_create_timetable(chat_id, message_id, token) do
+    CommandAPI.edit_message(chat_id, message_id, token, "Please enter time in format HH:MM:SS")
+  end
+
+  defp reply_invalid_time_input(chat_id, message_id, token) do
+    CommandAPI.edit_message(
+      chat_id,
+      message_id,
+      token,
+      "Bad format. Please enter time in HH:MM:SS format"
+    )
   end
 end
