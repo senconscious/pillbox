@@ -5,7 +5,7 @@ defmodule Pillbox.Bots.CommandAPI do
 
   alias Telegram.Api, as: TelegramApi
 
-  def edit_message(chat_id, message_id, token, text) do
+  def edit_message(%{chat_id: chat_id, message_id: message_id, token: token}, text) do
     TelegramApi.request(token, "editMessageText",
       chat_id: chat_id,
       message_id: message_id,
@@ -13,7 +13,7 @@ defmodule Pillbox.Bots.CommandAPI do
     )
   end
 
-  def edit_message(chat_id, message_id, token, text, keyboard) do
+  def edit_message(%{chat_id: chat_id, message_id: message_id, token: token}, text, keyboard) do
     TelegramApi.request(token, "editMessageText",
       chat_id: chat_id,
       message_id: message_id,
@@ -22,7 +22,7 @@ defmodule Pillbox.Bots.CommandAPI do
     )
   end
 
-  def send_message(chat_id, token, text, keyboard) do
+  def send_message(%{chat_id: chat_id, token: token}, text, keyboard) do
     TelegramApi.request(token, "sendMessage",
       chat_id: chat_id,
       text: text,
@@ -30,15 +30,15 @@ defmodule Pillbox.Bots.CommandAPI do
     )
   end
 
-  def delete_message(chat_id, message_id, token) do
+  def delete_message(%{chat_id: chat_id, message_id: message_id, token: token}) do
     TelegramApi.request(token, "deleteMessage", chat_id: chat_id, message_id: message_id)
   end
 
-  def answer_callback_query(callback_query_id, token) do
+  def answer_callback_query(%{callback_query_id: callback_query_id, token: token}) do
     TelegramApi.request(token, "answerCallbackQuery", callback_query_id: callback_query_id)
   end
 
-  def answer_callback_query(callback_query_id, token, text) do
+  def answer_callback_query(%{callback_query_id: callback_query_id, token: token}, text) do
     TelegramApi.request(token, "answerCallbackQuery",
       callback_query_id: callback_query_id,
       text: text

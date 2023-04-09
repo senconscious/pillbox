@@ -6,16 +6,15 @@ defmodule Pillbox.Bots.CourseCommands do
   alias Pillbox.Bots.Keyboards
   alias Pillbox.Helpers
 
-  def start_create_course(assigns, state) do
-    %{
-      chat_id: chat_id,
-      message_id: message_id,
-      token: token,
-      callback_query_id: callback_query_id
-    } = assigns
+  alias Pillbox.Bots.Structs.Message
+  alias Pillbox.Bots.Structs.CallbackQuery
 
-    CommandAPI.answer_callback_query(callback_query_id, token)
-    reply_for_create_course(chat_id, message_id, token)
+  def start_create_course(%CallbackQuery{} = callback_query, state) do
+    CommandAPI.answer_callback_query(callback_query)
+
+    text = build_text_for_step("pill_name", %{})
+    CommandAPI.edit_message(callback_query, text)
+
     {:ok, Map.merge(state, %{action: "create_course", step: "pill_name"})}
   end
 
@@ -23,13 +22,10 @@ defmodule Pillbox.Bots.CourseCommands do
     {:ok, Map.take(state, [:user_id, :bot_message_id])}
   end
 
-  def create_course(assigns, state) do
+  def create_course(%Message{message_text: message_text} = message, state) do
     %{step: step, bot_message_id: bot_message_id} = state
 
-    %{chat_id: chat_id, message_text: message_text, message_id: message_id, token: token} =
-      assigns
-
-    CommandAPI.delete_message(chat_id, message_id, token)
+    CommandAPI.delete_message(message)
 
     case cast_input(step, message_text) do
       {:ok, casted_data} ->
@@ -37,173 +33,128 @@ defmodule Pillbox.Bots.CourseCommands do
         next_step = get_next_step(step)
 
         reply_with_next_step_message(
-          chat_id,
-          bot_message_id,
+          %{message | message_id: bot_message_id},
           next_step,
-          course,
-          token
+          course
         )
 
         {:ok, Map.merge(state, %{step: next_step, course: course})}
 
       {:error, reason} ->
-        CommandAPI.edit_message(chat_id, bot_message_id, token, reason)
+        CommandAPI.edit_message(%{message | message_id: bot_message_id}, reason)
         {:ok, state}
     end
   end
 
-  def list_courses(assigns, state) do
-    %{
-      telegram_id: telegram_id,
-      chat_id: chat_id,
-      message_id: message_id,
-      token: token,
-      callback_query_id: callback_query_id
-    } = assigns
-
-    CommandAPI.answer_callback_query(callback_query_id, token)
+  def list_courses(%CallbackQuery{telegram_id: telegram_id} = callback_query, state) do
+    CommandAPI.answer_callback_query(callback_query)
 
     courses = Courses.list_courses_for_telegram_user(telegram_id)
 
-    reply_with_courses(chat_id, message_id, token, courses)
+    reply_with_courses(callback_query, courses)
 
     {:ok, state}
   end
 
-  def show_course(assigns, state) do
-    %{
-      chat_id: chat_id,
-      message_id: message_id,
-      token: token,
-      callback_query_id: callback_query_id,
-      course_id: course_id,
-      telegram_id: telegram_id
-    } = assigns
-
+  def show_course(
+        %CallbackQuery{telegram_id: telegram_id} = callback_query,
+        course_id,
+        state
+      ) do
     case Courses.get_course(course_id) do
       nil ->
-        CommandAPI.answer_callback_query(callback_query_id, token, "Course not found")
+        CommandAPI.answer_callback_query(callback_query, "Course not found")
 
         courses = Courses.list_courses_for_telegram_user(telegram_id)
-        reply_with_courses(chat_id, message_id, token, courses)
+        reply_with_courses(callback_query, courses)
 
       course ->
-        CommandAPI.answer_callback_query(callback_query_id, token)
-        reply_with_course(chat_id, message_id, token, course)
+        CommandAPI.answer_callback_query(callback_query)
+        reply_with_course(callback_query, course)
     end
 
     {:ok, state}
   end
 
-  def confirm_create_course(assigns, state) do
-    %{
-      chat_id: chat_id,
-      message_id: message_id,
-      token: token,
-      callback_query_id: callback_query_id,
-      telegram_id: telegram_id
-    } = assigns
-
+  def confirm_create_course(
+        %CallbackQuery{telegram_id: telegram_id} = callback_query,
+        state
+      ) do
     %{course: course, user_id: user_id} = state
 
-    CommandAPI.answer_callback_query(callback_query_id, token)
+    CommandAPI.answer_callback_query(callback_query)
 
     course
     |> Map.put(:user_id, user_id)
     |> Courses.create_course()
     |> case do
       {:ok, course} ->
-        reply_with_course(chat_id, message_id, token, course)
+        reply_with_course(callback_query, course)
 
       {:error, changeset} ->
         errors = Helpers.traverse_changeset_errors(changeset)
 
-        reply_with_failed_create_course(
-          chat_id,
-          message_id,
-          errors,
-          token,
-          telegram_id
-        )
+        reply_with_failed_create_course(callback_query, errors, telegram_id)
     end
 
     {:ok, Map.take(state, [:user_id, :bot_message_id])}
   end
 
-  def discard_create_course(assigns, state) do
-    %{
-      chat_id: chat_id,
-      message_id: message_id,
-      token: token,
-      callback_query_id: callback_query_id
-    } = assigns
-
+  def discard_create_course(%CallbackQuery{} = callback_query, state) do
     %{telegram_id: telegram_id} = state
 
-    CommandAPI.answer_callback_query(callback_query_id, token)
-    reply_discard_course_create(chat_id, message_id, token, telegram_id)
+    CommandAPI.answer_callback_query(callback_query)
+    reply_discard_course_create(callback_query, telegram_id)
 
     {:ok, Map.take(state, [:user_id, :bot_message_id])}
   end
 
-  def delete_course(assigns, state) do
-    %{
-      chat_id: chat_id,
-      message_id: message_id,
-      token: token,
-      callback_query_id: callback_query_id,
-      course_id: course_id,
-      telegram_id: telegram_id
-    } = assigns
-
+  def delete_course(
+        %CallbackQuery{telegram_id: telegram_id} = callback_query,
+        course_id,
+        state
+      ) do
     with course when not is_nil(course) <- Courses.get_course(course_id),
          {:ok, _deleted_course} <- Courses.delete_course(course) do
-      CommandAPI.answer_callback_query(callback_query_id, token, "Course successfully deleted")
+      CommandAPI.answer_callback_query(callback_query, "Course successfully deleted")
     else
       nil ->
-        CommandAPI.answer_callback_query(callback_query_id, token, "Course not found")
+        CommandAPI.answer_callback_query(callback_query, "Course not found")
 
       {:error, _changeset} ->
-        CommandAPI.answer_callback_query(callback_query_id, token, "Failed to delete course")
+        CommandAPI.answer_callback_query(callback_query, "Failed to delete course")
     end
 
     courses = Courses.list_courses_for_telegram_user(telegram_id)
-    reply_with_courses(chat_id, message_id, token, courses)
+    reply_with_courses(callback_query, courses)
 
     {:ok, Map.take(state, [:user_id, :bot_message_id])}
   end
 
-  defp reply_with_courses(chat_id, message_id, token, courses) do
+  defp reply_with_courses(callback_query, courses) do
     keyboard = Keyboards.build_inline_keyboard(:courses_menu, courses: courses)
-    text = "Courses"
 
-    CommandAPI.edit_message(chat_id, message_id, token, text, keyboard)
+    CommandAPI.edit_message(callback_query, "Courses", keyboard)
   end
 
-  defp reply_with_course(chat_id, message_id, token, course) do
+  defp reply_with_course(callback_query, course) do
     keyboard = Keyboards.build_inline_keyboard(:course_menu, course: course)
     text = build_text_for_show_course(course)
 
-    CommandAPI.edit_message(chat_id, message_id, token, text, keyboard)
+    CommandAPI.edit_message(callback_query, text, keyboard)
   end
 
-  defp reply_for_create_course(chat_id, message_id, token) do
-    text = build_text_for_step("pill_name", %{})
-    CommandAPI.edit_message(chat_id, message_id, token, text)
-  end
-
-  defp reply_discard_course_create(chat_id, message_id, token, telegram_id) do
+  defp reply_discard_course_create(callback_query, telegram_id) do
     keyboard = Keyboards.build_inline_keyboard(:main_menu, telegram_id: telegram_id)
-    text = "Course not created"
 
-    CommandAPI.edit_message(chat_id, message_id, token, text, keyboard)
+    CommandAPI.edit_message(callback_query, "Course not created", keyboard)
   end
 
-  defp reply_with_failed_create_course(chat_id, message_id, errors, token, telegram_id) do
+  defp reply_with_failed_create_course(callback_query, errors, telegram_id) do
     keyboard = Keyboards.build_inline_keyboard(:main_menu, telegram_id: telegram_id)
     text = build_text_for_failed_create_course(errors)
 
-    CommandAPI.edit_message(chat_id, message_id, token, text, keyboard)
+    CommandAPI.edit_message(callback_query, text, keyboard)
   end
 
   defp get_next_step(current_step) do
@@ -230,18 +181,18 @@ defmodule Pillbox.Bots.CourseCommands do
     end
   end
 
-  defp reply_with_next_step_message(chat_id, message_id, step, course_attrs, token)
+  defp reply_with_next_step_message(message, step, course_attrs)
        when step == "confirmation" do
     text = build_text_for_step(step, course_attrs)
     keyboard = Keyboards.build_inline_keyboard(:course_confirmation)
 
-    CommandAPI.edit_message(chat_id, message_id, token, text, keyboard)
+    CommandAPI.edit_message(message, text, keyboard)
   end
 
-  defp reply_with_next_step_message(chat_id, message_id, step, course_attrs, token) do
+  defp reply_with_next_step_message(message, step, course_attrs) do
     text = build_text_for_step(step, course_attrs)
 
-    CommandAPI.edit_message(chat_id, message_id, token, text)
+    CommandAPI.edit_message(message, text)
   end
 
   defp put_casted_data_to_course_attrs(%{course: course}, step, data) when is_map(course) do

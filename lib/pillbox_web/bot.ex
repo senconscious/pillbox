@@ -1,17 +1,17 @@
 defmodule PillboxWeb.Bot do
-  @doc """
+  @moduledoc """
     Pillbox stateful bot request handler
 
     Parses request type based on request params and invokes `Bots` domain.
     Currently handles only plain messages and callback queries.
-
-    Builds `assigns` based on request params and passes them into `Bots` domain.
-    For more information look at `build_message_assigns/2` and `build_callback_query_assigns/2` in code
-
-    `Bots` domain invoked with `assigns` and `chat_state`
+    Passes either `%Pillbox.Bots.Structs.Message{}` either `%Pillbox.Bots.Structs.CallbackQuery{}`
+    as first argument to domain functions
   """
 
   use Telegram.ChatBot
+
+  alias Pillbox.Bots.Structs.Message
+  alias Pillbox.Bots.Structs.CallbackQuery
 
   alias Pillbox.Bots.CheckinCommands
   alias Pillbox.Bots.Commands
@@ -24,76 +24,64 @@ defmodule PillboxWeb.Bot do
   end
 
   @impl Telegram.ChatBot
-  def handle_update(%{"message" => message}, token, chat_state) do
-    %{message_text: message_text} = assigns = build_message_assigns(message, token)
+  def handle_update(%{"message" => message_params}, token, chat_state) do
+    %{message_text: message_text} = message = build_message_struct(message_params, token)
 
     cond do
       start_command?(message_text) ->
-        Commands.start(assigns, chat_state)
+        Commands.start(message, chat_state)
 
       create_course_action?(chat_state) ->
-        CourseCommands.create_course(assigns, chat_state)
+        CourseCommands.create_course(message, chat_state)
 
       create_timetable_action?(chat_state) ->
-        TimetableCommands.create_timetable(assigns, chat_state)
+        TimetableCommands.create_timetable(message, chat_state)
 
       true ->
-        Commands.handle_unknown_action(assigns, chat_state)
+        Commands.handle_unknown_action(message, chat_state)
     end
   end
 
   @impl Telegram.ChatBot
-  def handle_update(%{"callback_query" => callback_query}, token, chat_state) do
-    %{action: action} = assigns = build_callback_query_assigns(callback_query, token)
+  def handle_update(%{"callback_query" => callback_query_params}, token, chat_state) do
+    %{action: action} = callback_query = build_callback_query_struct(callback_query_params, token)
 
     case action do
       "list_courses" ->
-        CourseCommands.list_courses(assigns, chat_state)
+        CourseCommands.list_courses(callback_query, chat_state)
 
       "start_create_course" ->
-        CourseCommands.start_create_course(assigns, chat_state)
+        CourseCommands.start_create_course(callback_query, chat_state)
 
       "confirm_create_course" ->
-        CourseCommands.confirm_create_course(assigns, chat_state)
+        CourseCommands.confirm_create_course(callback_query, chat_state)
 
       "discard_create_course" ->
-        CourseCommands.discard_create_course(assigns, chat_state)
+        CourseCommands.discard_create_course(callback_query, chat_state)
 
       "show_course_" <> course_id ->
-        assigns
-        |> Map.put(:course_id, course_id)
-        |> CourseCommands.show_course(chat_state)
+        CourseCommands.show_course(callback_query, course_id, chat_state)
 
       "delete_course_" <> course_id ->
-        assigns
-        |> Map.put(:course_id, course_id)
-        |> CourseCommands.delete_course(chat_state)
+        CourseCommands.delete_course(callback_query, course_id, chat_state)
 
       "list_course_timetable_" <> course_id ->
-        assigns
-        |> Map.put(:course_id, course_id)
-        |> TimetableCommands.list_timetables(chat_state)
+        TimetableCommands.list_timetables(callback_query, course_id, chat_state)
 
       "start_create_timetable_" <> course_id ->
-        assigns
-        |> Map.put(:course_id, course_id)
-        |> TimetableCommands.start_create_timetable(chat_state)
+        TimetableCommands.start_create_timetable(callback_query, course_id, chat_state)
 
       "delete_timetable_" <> timetable_id ->
-        assigns
-        |> Map.put(:timetable_id, timetable_id)
-        |> TimetableCommands.delete_timetable(chat_state)
+        TimetableCommands.delete_timetable(callback_query, timetable_id, chat_state)
 
       "list_pending_checkins_" <> _telegram_id ->
-        CheckinCommands.list_checkins(assigns, chat_state)
+        CheckinCommands.list_checkins(callback_query, chat_state)
 
       "checkin_" <> checkin_id ->
-        assigns
-        |> Map.put(:checkin_id, checkin_id)
-        |> CheckinCommands.checkin(chat_state)
+        CheckinCommands.checkin(callback_query, checkin_id, chat_state)
 
       _unknown_action ->
-        Commands.handle_unknown_query(assigns, chat_state)
+        Commands.handle_unknown_query(callback_query, chat_state)
     end
   end
 
@@ -107,15 +95,15 @@ defmodule PillboxWeb.Bot do
 
   defp create_timetable_action?(_chat_state), do: false
 
-  defp build_message_assigns(message, token) do
+  defp build_message_struct(message_params, token) do
     %{
       "chat" => %{"id" => chat_id},
       "text" => text,
       "message_id" => message_id,
       "from" => %{"id" => telegram_id}
-    } = message
+    } = message_params
 
-    %{
+    %Message{
       token: token,
       chat_id: chat_id,
       message_text: text,
@@ -124,7 +112,7 @@ defmodule PillboxWeb.Bot do
     }
   end
 
-  defp build_callback_query_assigns(callback_query, token) do
+  defp build_callback_query_struct(callback_query_params, token) do
     %{
       "data" => action,
       "message" => %{
@@ -133,9 +121,9 @@ defmodule PillboxWeb.Bot do
       },
       "id" => callback_query_id,
       "from" => %{"id" => telegram_id}
-    } = callback_query
+    } = callback_query_params
 
-    %{
+    %CallbackQuery{
       action: action,
       chat_id: chat_id,
       message_id: message_id,
