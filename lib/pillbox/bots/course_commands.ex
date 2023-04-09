@@ -112,8 +112,8 @@ defmodule Pillbox.Bots.CourseCommands do
     |> Map.put(:user_id, user_id)
     |> Courses.create_course()
     |> case do
-      {:ok, _course} ->
-        reply_with_success_create_course(chat_id, message_id, token, telegram_id)
+      {:ok, course} ->
+        reply_with_course(chat_id, message_id, token, course)
 
       {:error, changeset} ->
         errors = Helpers.traverse_changeset_errors(changeset)
@@ -195,13 +195,6 @@ defmodule Pillbox.Bots.CourseCommands do
   defp reply_discard_course_create(chat_id, message_id, token, telegram_id) do
     keyboard = Keyboards.build_inline_keyboard(:main_menu, telegram_id: telegram_id)
     text = "Course not created"
-
-    CommandAPI.edit_message(chat_id, message_id, token, text, keyboard)
-  end
-
-  defp reply_with_success_create_course(chat_id, message_id, token, telegram_id) do
-    keyboard = Keyboards.build_inline_keyboard(:main_menu, telegram_id: telegram_id)
-    text = "Successfully created course"
 
     CommandAPI.edit_message(chat_id, message_id, token, text, keyboard)
   end

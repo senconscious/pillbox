@@ -16,6 +16,7 @@ Allows you to checkin your pill intakes in telegram by creating pill course and 
 - [ ] User can view checked pill intakes
 - [ ] User can view incomming pill intakes
 - [ ] User notified about incomming pill intakes
+- [ ] Support custom timezone
 
 ## MVP database structure
 
