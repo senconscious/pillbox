@@ -1,9 +1,13 @@
-defmodule Pillbox.Courses.Checkin do
+defmodule Pillbox.Courses.Schemas.Checkin do
+  @moduledoc """
+    Checkin Schema
+  """
+
   use Ecto.Schema
 
   import Ecto.Changeset
 
-  alias Pillbox.Courses.Timetable
+  alias Pillbox.Courses.Schemas.Timetable
 
   schema "checkins" do
     field :checked?, :boolean, default: false

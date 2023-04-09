@@ -1,4 +1,4 @@
-defmodule Pillbox.Courses.Course do
+defmodule Pillbox.Courses.Schemas.Course do
   @moduledoc """
     Course Schema
   """
@@ -7,8 +7,8 @@ defmodule Pillbox.Courses.Course do
 
   import Ecto.Changeset
 
-  alias Pillbox.Accounts.User
-  alias Pillbox.Courses.Timetable
+  alias Pillbox.Accounts.Schemas.User
+  alias Pillbox.Courses.Schemas.Timetable
 
   @required [:pill_name, :start_date, :end_date, :user_id]
 

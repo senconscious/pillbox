@@ -1,6 +1,6 @@
-defmodule Pillbox.BotTimetables do
-  alias Pillbox.BotReplies
-  alias Pillbox.Timetables
+defmodule Pillbox.Bots.TimetableCommands do
+  alias Pillbox.Bots.ReplyCommands
+  alias Pillbox.Courses.Timetables
 
   def list_timetables(assigns, state) do
     %{
@@ -11,11 +11,11 @@ defmodule Pillbox.BotTimetables do
       course_id: course_id
     } = assigns
 
-    BotReplies.answer_callback_query(callback_query_id, token)
+    ReplyCommands.answer_callback_query(callback_query_id, token)
 
     timetables = Timetables.list_course_timetables(course_id)
 
-    BotReplies.reply_timetable_menu(chat_id, message_id, token, course_id, timetables)
+    ReplyCommands.reply_timetable_menu(chat_id, message_id, token, course_id, timetables)
 
     {:ok, Map.put(state, :course_id, course_id)}
   end
@@ -29,9 +29,9 @@ defmodule Pillbox.BotTimetables do
       course_id: course_id
     } = assigns
 
-    BotReplies.answer_callback_query(callback_query_id, token)
+    ReplyCommands.answer_callback_query(callback_query_id, token)
 
-    BotReplies.reply_for_create_timetable(chat_id, message_id, token)
+    ReplyCommands.reply_for_create_timetable(chat_id, message_id, token)
 
     {:ok,
      Map.merge(state, %{
@@ -51,19 +51,19 @@ defmodule Pillbox.BotTimetables do
 
     %{timetable: attrs, bot_message_id: bot_message_id, course_id: course_id} = state
 
-    BotReplies.delete_message(chat_id, message_id, token)
+    ReplyCommands.delete_message(chat_id, message_id, token)
 
     with {:ok, time} <- Time.from_iso8601(message_text),
          {:ok, _timetable} <- Timetables.create_timetable(Map.put(attrs, :pill_time, time)) do
       timetables = Timetables.list_course_timetables(course_id)
-      BotReplies.reply_timetable_menu(chat_id, bot_message_id, token, course_id, timetables)
+      ReplyCommands.reply_timetable_menu(chat_id, bot_message_id, token, course_id, timetables)
 
       {:ok, Map.take(state, [:user_id, :bot_message_id, :course_id])}
     else
       {:error, %Ecto.Changeset{}} ->
         timetables = Timetables.list_course_timetables(course_id)
 
-        BotReplies.reply_timetable_menu(
+        ReplyCommands.reply_timetable_menu(
           chat_id,
           bot_message_id,
           token,
@@ -75,7 +75,7 @@ defmodule Pillbox.BotTimetables do
         {:ok, Map.take(state, [:user_id, :bot_message_id, :course_id])}
 
       {:error, _error} ->
-        BotReplies.reply_invalid_time_input(chat_id, bot_message_id, token)
+        ReplyCommands.reply_invalid_time_input(chat_id, bot_message_id, token)
 
         {:ok, state}
     end
@@ -92,19 +92,19 @@ defmodule Pillbox.BotTimetables do
 
     %{course_id: course_id} = state
 
-    BotReplies.answer_callback_query(callback_query_id, token)
+    ReplyCommands.answer_callback_query(callback_query_id, token)
 
     with timetable when not is_nil(timetable) <- Timetables.get_timetable(timetable_id),
          {:ok, %{course_id: course_id}} <- Timetables.delete_timetable(timetable) do
       timetables = Timetables.list_course_timetables(course_id)
-      BotReplies.reply_timetable_menu(chat_id, message_id, token, course_id, timetables)
+      ReplyCommands.reply_timetable_menu(chat_id, message_id, token, course_id, timetables)
 
       {:ok, state}
     else
       nil ->
         timetables = Timetables.list_course_timetables(course_id)
 
-        BotReplies.reply_timetable_menu(
+        ReplyCommands.reply_timetable_menu(
           chat_id,
           message_id,
           token,
@@ -118,7 +118,7 @@ defmodule Pillbox.BotTimetables do
       {:error, _changeset} ->
         timetables = Timetables.list_course_timetables(course_id)
 
-        BotReplies.reply_timetable_menu(
+        ReplyCommands.reply_timetable_menu(
           chat_id,
           message_id,
           token,

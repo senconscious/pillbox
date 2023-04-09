@@ -2,7 +2,7 @@
 
 ## Description
 
-Allows you to track your pill intakes in telegram
+Allows you to checkin your pill intakes in telegram by creating pill course and timetable for it
 
 ## MVP
 
@@ -13,6 +13,7 @@ Allows you to track your pill intakes in telegram
 - [ ] User can update timetable for course
 - [x] User can delete timetable for course
 - [x] User can checkin pill intakes
+- [ ] User can view checked pill intakes
 - [ ] User can view incomming pill intakes
 - [ ] User notified about incomming pill intakes
 
@@ -41,3 +42,16 @@ mix deps.get
 ```sh
 source .env && iex -S mix
 ```
+
+## Architecture
+
+### Pillbox
+
+- `Accounts` — domain with users logic
+- `Bots` — domain with telegram bot command logic. Invokes API from `Courses` and `Accounts` domains
+- `Courses` — domain with logic for courses/timetables/checkins
+- `Jobs` — domain with all periodic jobs 
+
+### PillboxWeb
+
+-  `PillboxWeb.Bot` — bot request router. Invokes commands from `Pillbox.Bots` domain

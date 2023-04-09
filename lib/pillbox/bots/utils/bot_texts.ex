@@ -1,4 +1,4 @@
-defmodule Pillbox.Bots.BotTexts do
+defmodule Pillbox.Bots.Utils.BotTexts do
   @moduledoc """
     Texts fot pillbox bot
   """

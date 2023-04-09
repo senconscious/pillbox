@@ -1,13 +1,13 @@
-defmodule Pillbox.Timetables do
+defmodule Pillbox.Courses.Timetables do
   @moduledoc """
     Timetables API
   """
 
   import Ecto.Query, only: [where: 3, order_by: 2]
 
-  alias Pillbox.Jobs.TimetableJob
+  alias Pillbox.Jobs.CreateCheckinJob
 
-  alias Pillbox.Courses.Timetable
+  alias Pillbox.Courses.Schemas.Timetable
   alias Pillbox.Repo
 
   @one_day_in_seconds 24 * 60 * 60
@@ -34,7 +34,7 @@ defmodule Pillbox.Timetables do
     schedule_in = get_seconds_for_timetable_job(pill_time)
 
     %{timetable_id: timetable_id, schedule_in: schedule_in}
-    |> TimetableJob.new()
+    |> CreateCheckinJob.new()
     |> Oban.insert()
   end
 

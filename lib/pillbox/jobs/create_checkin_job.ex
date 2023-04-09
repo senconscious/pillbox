@@ -1,7 +1,7 @@
-defmodule Pillbox.Jobs.TimetableJob do
-  use Oban.Worker, queue: :course_timetables, max_attempts: 1
+defmodule Pillbox.Jobs.CreateCheckinJob do
+  use Oban.Worker, queue: :checkins, max_attempts: 1
 
-  alias Pillbox.Checkins
+  alias Pillbox.Courses.Checkins
 
   @one_day_in_seconds 24 * 60 * 60
 

@@ -1,4 +1,4 @@
-defmodule Pillbox.Checkins do
+defmodule Pillbox.Courses.Checkins do
   @moduledoc """
     Checkins API
   """
@@ -11,7 +11,7 @@ defmodule Pillbox.Checkins do
       select_merge: 3
     ]
 
-  alias Pillbox.Courses.Checkin
+  alias Pillbox.Courses.Schemas.Checkin
   alias Pillbox.Repo
 
   def create_checkin(timetable_id) do

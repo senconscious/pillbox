@@ -1,14 +1,22 @@
 defmodule PillboxWeb.Bot do
   @doc """
-    Pillbox's Telegram Bot
+    Pillbox stateful bot request handler
+
+    Parses request type based on request params and invokes `Bots` domain.
+    Currently handles only plain messages and callback queries.
+
+    Builds `assigns` based on request params and passes them into `Bots` domain.
+    For more information look at `build_message_assigns/2` and `build_callback_query_assigns/2` in code
+
+    `Bots` domain invoked with `assigns` and `chat_state`
   """
 
   use Telegram.ChatBot
 
-  alias Pillbox.BotCheckins
-  alias Pillbox.BotCommands
-  alias Pillbox.BotCourses
-  alias Pillbox.BotTimetables
+  alias Pillbox.Bots.CheckinCommands
+  alias Pillbox.Bots.Commands
+  alias Pillbox.Bots.CourseCommands
+  alias Pillbox.Bots.TimetableCommands
 
   @impl Telegram.ChatBot
   def init(_chat) do
@@ -21,16 +29,16 @@ defmodule PillboxWeb.Bot do
 
     cond do
       start_command?(message_text) ->
-        BotCommands.start(assigns, chat_state)
+        Commands.start(assigns, chat_state)
 
       create_course_action?(chat_state) ->
-        BotCourses.create_course(assigns, chat_state)
+        CourseCommands.create_course(assigns, chat_state)
 
       create_timetable_action?(chat_state) ->
-        BotTimetables.create_timetable(assigns, chat_state)
+        TimetableCommands.create_timetable(assigns, chat_state)
 
       true ->
-        BotCommands.handle_unknown_action(assigns, chat_state)
+        Commands.handle_unknown_action(assigns, chat_state)
     end
   end
 
@@ -40,52 +48,52 @@ defmodule PillboxWeb.Bot do
 
     case action do
       "list_courses" ->
-        BotCourses.list_courses(assigns, chat_state)
+        CourseCommands.list_courses(assigns, chat_state)
 
       "start_create_course" ->
-        BotCourses.start_create_course(assigns, chat_state)
+        CourseCommands.start_create_course(assigns, chat_state)
 
       "confirm_create_course" ->
-        BotCourses.confirm_create_course(assigns, chat_state)
+        CourseCommands.confirm_create_course(assigns, chat_state)
 
       "discard_create_course" ->
-        BotCourses.discard_create_course(assigns, chat_state)
+        CourseCommands.discard_create_course(assigns, chat_state)
 
       "show_course_" <> course_id ->
         assigns
         |> Map.put(:course_id, course_id)
-        |> BotCourses.show_course(chat_state)
+        |> CourseCommands.show_course(chat_state)
 
       "delete_course_" <> course_id ->
         assigns
         |> Map.put(:course_id, course_id)
-        |> BotCourses.delete_course(chat_state)
+        |> CourseCommands.delete_course(chat_state)
 
       "list_course_timetable_" <> course_id ->
         assigns
         |> Map.put(:course_id, course_id)
-        |> BotTimetables.list_timetables(chat_state)
+        |> TimetableCommands.list_timetables(chat_state)
 
       "start_create_timetable_" <> course_id ->
         assigns
         |> Map.put(:course_id, course_id)
-        |> BotTimetables.start_create_timetable(chat_state)
+        |> TimetableCommands.start_create_timetable(chat_state)
 
       "delete_timetable_" <> timetable_id ->
         assigns
         |> Map.put(:timetable_id, timetable_id)
-        |> BotTimetables.delete_timetable(chat_state)
+        |> TimetableCommands.delete_timetable(chat_state)
 
       "list_pending_checkins_" <> _telegram_id ->
-        BotCheckins.list_checkins(assigns, chat_state)
+        CheckinCommands.list_checkins(assigns, chat_state)
 
       "checkin_" <> checkin_id ->
         assigns
         |> Map.put(:checkin_id, checkin_id)
-        |> BotCheckins.checkin(chat_state)
+        |> CheckinCommands.checkin(chat_state)
 
       _unknown_action ->
-        BotCommands.handle_unknown_query(assigns, chat_state)
+        Commands.handle_unknown_query(assigns, chat_state)
     end
   end
 

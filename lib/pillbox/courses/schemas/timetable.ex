@@ -1,10 +1,14 @@
-defmodule Pillbox.Courses.Timetable do
+defmodule Pillbox.Courses.Schemas.Timetable do
+  @moduledoc """
+    Timetable Schema
+  """
+
   use Ecto.Schema
 
   import Ecto.Changeset
 
-  alias Pillbox.Courses.Course
-  alias Pillbox.Courses.Checkin
+  alias Pillbox.Courses.Schemas.Course
+  alias Pillbox.Courses.Schemas.Checkin
 
   schema "timetables" do
     field :pill_time, :time

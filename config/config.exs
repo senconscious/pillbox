@@ -6,8 +6,8 @@ config :tesla, adapter: {Tesla.Adapter.Hackney, [recv_timeout: 40_000]}
 
 config :pillbox, Pillbox.Scheduler,
   jobs: [
-    {"@daily", {Pillbox.Jobs.CourseJob, :update_expired_courses, []}},
-    {"@daily", {Pillbox.Jobs.CourseJob, :update_started_courses, []}}
+    {"@daily", {Pillbox.Jobs.ExpireCoursesJob, :perform, []}},
+    {"@daily", {Pillbox.Jobs.ActivateCoursesJob, :perform, []}}
   ]
 
 config :pillbox, Oban,

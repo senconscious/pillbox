@@ -1,10 +1,10 @@
-defmodule Pillbox.Accounts do
+defmodule Pillbox.Accounts.Users do
   @moduledoc """
-    Accounts API
+    Users API
   """
 
   alias Pillbox.Repo
-  alias Pillbox.Accounts.User
+  alias Pillbox.Accounts.Schemas.User
 
   def get_or_create_user(telegram_id) do
     with nil <- get_user_by(telegram_id: telegram_id) do
